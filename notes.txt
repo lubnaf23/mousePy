@@ -6,4 +6,7 @@ min_tracking_confidence --> b/w 0.0 and 1, ignored if static_image_model is true
 
 MATH FILE ---
 
-angle is created at point 6 when index is bent ---> 3 poitns are needed
+angle is created at point 6 when index is bent ---> 3 poitns are needed 
+a, b, c where b is the union
+direction of vectors = arctan(y/x)
+arctan2 returns angle between +ve x-axis and vector (x,y) --> 0 and 1 are x and y respectively
