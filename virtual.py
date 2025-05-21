@@ -11,8 +11,6 @@ hands = mpHands.Hands(
 def main():
     cap = cv2.VideoCapture(1)
     draw = mp.solutions.drawing_utils #draw landmarks of the hand
-    
-    
     try:
         while cap.isOpened():
             ret, frame = cap.read() #returning a boolean value if it was able to read
@@ -33,7 +31,7 @@ def main():
                 for lm in hand_landmarks.landmark:
                     landmarks_list.append((lm.x, lm.y))
             
-                print(landmarks_list)
+                print(landmarks_list) #prints all 21 x, y for each capture 
             
             cv2.imshow('Frame', frame) #show the frame captured
             if cv2.waitKey(1) & 0xFF == ord('q'): #wait for millisecond unless key is q then break
