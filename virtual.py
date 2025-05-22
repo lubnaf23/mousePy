@@ -3,6 +3,8 @@ import mediapipe as mp
 import mathfunc
 import pyautogui
 
+prev_y = None
+
 screen_width, screen_height = pyautogui.size()
 mpHands = mp.solutions.hands
 hands = mpHands.Hands(
@@ -19,12 +21,41 @@ def find_finger_tip(processed):
         return hand_landmarks.landmark[mpHands.HandLandmark.INDEX_FINGER_TIP]
     return None
 
+def scroll_with_finger(index_finger_tip):
+    global prev_y
+
+    if index_finger_tip is None:
+        return
+
+    current_y = index_finger_tip.y  # Y is in normalized coordinates (0 to 1)
+
+    if prev_y is not None:
+        delta = current_y - prev_y  # positive = moved down, negative = moved up
+
+        # You can tweak this threshold
+        if abs(delta) > 0.01:
+            scroll_amount = int(delta * 1000)  # scale for pyautogui
+            pyautogui.scroll(-scroll_amount)  # negative = scroll down, positive = scroll up
+
+    prev_y = current_y
+
 def move_mouse(index_finger_tip):
     if index_finger_tip is not None:
         x = int(index_finger_tip.x * screen_width)
         y = int(index_finger_tip.y * screen_height)
         pyautogui.moveTo(x,y)
+
+def is_right_click(landmarks_list, thumb_index_dist):
+    return (mathfunc.get_angle(landmarks_list[5], landmarks_list[6], landmarks_list[8]) < 50 and 
+            mathfunc.get_angle(landmarks_list[9], landmarks_list[10], landmarks_list[12] > 90 and thumb_index_dist > 50)) #checks if index is bent, middle is straight and thumb is out
+
+def is_left_click(landmarks_list, thumb_index_dist):
+    return (mathfunc.get_angle(landmarks_list[5], landmarks_list[6], landmarks_list[8]) > 90 and 
+            mathfunc.get_angle(landmarks_list[9], landmarks_list[10], landmarks_list[12] < 50 and thumb_index_dist > 50)) #checks if index is staright, middle is bent and thumb is out
         
+
+    
+
 def detect_gestures(frame, landmarks_list, processed):
     if len(landmarks_list) >= 21:
         
@@ -39,6 +70,12 @@ def detect_gestures(frame, landmarks_list, processed):
         if thumb_index_dist < 50 and mathfunc.get_angle(landmarks_list[5], landmarks_list[6], landmarks_list[8]) > 90:
             #now move mouse
             move_mouse(index_finger_tip)
+            
+        elif thumb_index_dist > 50 and mathfunc.get_angle(landmarks_list[5], landmarks_list[6], landmarks_list[8]) > 90 and mathfunc.get_angle(landmarks_list[9], landmarks_list[10], landmarks_list[12]) > 90:
+            scroll_with_finger(index_finger_tip)
+            
+        #LEFT CLICK HERE
+
             
     
 def main():
